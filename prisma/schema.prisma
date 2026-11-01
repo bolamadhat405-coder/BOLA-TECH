@@ -110,3 +110,34 @@ model AuditLog {
   @@index([entityType, entityId, createdAt])
   @@index([createdAt])
 }
+
+enum WorkspaceArea {
+  CRM
+  PROJECTS
+  FINANCE
+  INVENTORY
+  HR
+  SALES
+  SUPPORT
+}
+
+model WorkspaceRecord {
+  id          String        @id @default(cuid())
+  area        WorkspaceArea
+  title       String
+  description String?       @db.Text
+  status      String        @default("OPEN")
+  reference   String?       @unique
+  customer    String?
+  owner       String?
+  amountMinor Int?
+  currency    String        @default("EGP")
+  dueAt       DateTime?
+  data        Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([area, status, updatedAt])
+  @@index([customer])
+  @@index([dueAt])
+}
