@@ -25,6 +25,8 @@ BOLA TECH's Arabic-first corporate platform and digital-services workspace.
 - Basic service health endpoint at `GET /api/health` that checks database connectivity.
 - Protected admin portal at `/admin` with hashed-password login, signed HTTP-only sessions, failed-login throttling, inquiry search, and audited status updates.
 - Customer tracking portal at `/track`, requiring both the inquiry reference and matching email address.
+- Original orbital visual identity assets: a digital planet hero, connected-data orbital network, and deep-space visual, stored under `public/visuals`.
+- Admin command center at `/admin` with overview, inquiry operations, and a visual asset library for the approved BOLA TECH identity.
 
 ## Configuration still required
 The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migrations are applied. No database credentials are committed.
