@@ -30,6 +30,7 @@ export default function AdminPage() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "تعذر تحميل الطلبات");
     setItems(data.items as Inquiry[]);
+    if (data.admin) setAdmin(data.admin as Admin);
   }, []);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function AdminPage() {
         if (!response.ok) throw new Error("تعذر تحميل لوحة الإدارة");
         return response.json();
       })
-      .then(data => { if (active && data) setItems(data.items as Inquiry[]); })
+      .then(data => { if (active && data) { setItems(data.items as Inquiry[]); setAdmin(data.admin as Admin); } })
       .catch(err => { if (active) setError(err instanceof Error ? err.message : "حدث خطأ"); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
