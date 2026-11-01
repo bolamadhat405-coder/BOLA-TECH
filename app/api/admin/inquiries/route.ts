@@ -42,7 +42,9 @@ export async function PATCH(request: NextRequest) {
   if (origin && origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
   }
-  const admin = await getAdminSession();
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  const admin = await prisma.adminUser.findFirst({ where: { id: session.id, isActive: true }, select: { id: true, email: true } });
   if (!admin) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
   const body = await request.json().catch(() => null);
