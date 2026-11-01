@@ -21,6 +21,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Package source for review
+        run: zip -r BOLA-TECH-review.zip . -x '.git/*' 'node_modules/*' '.next/*' '.vercel/*'
+      - name: Upload review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOLA-TECH-review
+          path: BOLA-TECH-review.zip
+          if-no-files-found: error
+          retention-days: 7
       - name: Install dependencies
         run: npm install
       - name: Validate Prisma schema
