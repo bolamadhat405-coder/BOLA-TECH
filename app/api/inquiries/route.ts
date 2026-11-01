@@ -19,7 +19,7 @@ const inquirySchema = z.object({
 });
 
 function makeReference() {
-  return `BOLA-${Date.now().toString(36).toUpperCase()}-${randomBytes(3).toString("hex").toUpperCase()}`;
+  return `BOLA-${Date.now().toString(36).toUpperCase()}-${randomBytes(8).toString("hex").toUpperCase()}`;
 }
 
 export async function POST(request: NextRequest) {
