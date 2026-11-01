@@ -1,33 +1,37 @@
 # BOLA TECH
 
-Bilingual-first corporate website and digital solutions catalog for BOLA TECH.
+BOLA TECH's Arabic-first corporate platform and digital-services workspace.
 
 ## Stack
-- Next.js 15 App Router
-- React 19 + TypeScript
-- Tailwind CSS v4 PostCSS integration
-- Lucide icons
+- Next.js App Router, React, TypeScript
+- PostgreSQL + Prisma ORM
+- Zod request validation
+- Lucide icons and responsive RTL-first interface
 
-## Run locally
-```bash
-npm install
-npm run dev
-```
+## Local setup
+1. Install Node.js 22 or newer.
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env` and set `DATABASE_URL`.
+4. Apply the database migration: `npx prisma migrate deploy`
+5. Start the app: `npm run dev`
 
-Open http://localhost:3000.
+## Implemented
+- Arabic-first responsive corporate site and English toggle.
+- Searchable product/solutions catalog and detail dialogs.
+- Inquiry shortlist with add/remove controls.
+- Customer inquiry form connected to `POST /api/inquiries`.
+- Server-side validation, generated inquiry reference, PostgreSQL persistence, and an initial event record.
+- Initial PostgreSQL schema and migration for inquiries, inquiry events, admin users, digital products, and audit logs.
+- Basic service health endpoint at `GET /api/health`.
 
-## Current working scope
-- Responsive Arabic-first landing page
-- Arabic/English interface toggle
-- Solutions catalog with live search and category filters
-- Product detail dialogs
-- Inquiry shortlist with add/remove and clipboard export
-- Accessible labels for key interactive controls
+## Configuration still required
+The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migration is applied. No database credentials are committed.
 
-## Not implemented yet
-Payments, accounts, database-backed inquiry submission, admin authentication, customer portals, subscriptions, and automatic customer website provisioning are not connected yet. These require backend infrastructure and provider credentials; the UI does not pretend those operations are live.
+## Not yet implemented
+Admin sign-in and authorization, private admin inquiry screens, customer accounts and order tracking, payment provider integration, subscription billing, email/WhatsApp notifications, file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
 
-## Build
+## Checks
 ```bash
 npm run build
+npx prisma validate
 ```
