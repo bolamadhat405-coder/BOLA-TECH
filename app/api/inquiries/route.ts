@@ -57,6 +57,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const recentFromEmail = await prisma.inquiry.count({
+      where: { email: parsed.data.email.toLowerCase(), createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) } },
+    });
+    if (recentFromEmail >= 5) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const reference = makeReference();
     const inquiry = await prisma.inquiry.create({
       data: {
