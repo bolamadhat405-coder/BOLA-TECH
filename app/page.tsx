@@ -103,12 +103,11 @@ export default function Home() {
           <div className="hero-buttons"><a className="primary-btn" href="#products">{isEn ? "Explore solutions" : "استكشف الحلول"} <ArrowLeft size={18}/></a><a className="secondary-btn" href="#about">{isEn ? "Discover BOLA TECH" : "اكتشف BOLA TECH"} <ArrowUpRight size={17}/></a></div>
           <div className="hero-proof"><span><Check size={15}/> {isEn ? "Clear scope" : "نطاق عمل واضح"}</span><span><Check size={15}/> {isEn ? "Tested delivery" : "تسليم بعد الاختبار"}</span><span><Check size={15}/> {isEn ? "Human support" : "دعم بشري"}</span></div>
         </div>
-        <div className="hero-art" aria-label="Abstract digital technology illustration">
-          <div className="orbit orbit-a"/><div className="orbit orbit-b"/>
-          <div className="core"><div className="core-logo">B</div><span>BOLA TECH</span><small>CONNECTED SYSTEMS</small></div>
+        <div className="hero-art" aria-label="BOLA TECH digital planet and orbital network">
+          <div className="planet-halo"/><img className="planet-visual" src="/visuals/planet-core.svg" alt="BOLA TECH luminous digital planet with orbital rings"/>
           <div className="float-card card-ai"><Bot size={22}/><span>AI SYSTEMS</span><b>01</b></div>
           <div className="float-card card-web"><MonitorSmartphone size={22}/><span>WEB PLATFORMS</span><b>02</b></div>
-          <div className="float-card card-flow"><Workflow size={22}/><span>AUTOMATION</span><b>03</b></div>
+          <div className="float-card card-flow"><Workflow size={22}/><span>CONNECTED DATA</span><b>03</b></div>
           <div className="art-grid"/>
         </div>
         <div className="hero-bottom"><span><ShieldCheck/> {isEn ? "Security-minded design" : "تصميم يراعي الأمان"}</span><span><Zap/> {isEn ? "Efficient workflows" : "مسارات عمل فعّالة"}</span><span><Sparkles/> {isEn ? "Built around your needs" : "حلول حسب احتياجك"}</span></div>
