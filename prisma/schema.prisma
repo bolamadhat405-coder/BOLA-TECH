@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InquiryStatus {
+  NEW
+  REVIEWING
+  WAITING_FOR_CUSTOMER
+  APPROVED
+  IN_PROGRESS
+  READY_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+}
+
+enum AuditActorType {
+  SYSTEM
+  ADMIN
+  CUSTOMER
+}
+
+model Inquiry {
+  id            String        @id @default(cuid())
+  reference     String        @unique
+  customerName  String
+  email         String
+  phone         String?
+  company       String?
+  message       String        @db.Text
+  items         Json
+  status        InquiryStatus @default(NEW)
+  source        String        @default("website")
+  consentAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  events        InquiryEvent[]
+
+  @@index([status, createdAt])
+  @@index([email, createdAt])
+}
+
+model InquiryEvent {
+  id         String          @id @default(cuid())
+  inquiryId  String
+  actorType  AuditActorType   @default(SYSTEM)
+  actorLabel String          @default("System")
+  action     String
+  details    Json?
+  createdAt  DateTime        @default(now())
+  inquiry    Inquiry         @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+}
+
+model AdminUser {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  passwordHash    String
+  role            String   @default("ADMIN")
+  isActive        Boolean  @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DigitalProduct {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  nameAr         String
+  nameEn         String
+  descriptionAr  String   @db.Text
+  descriptionEn  String   @db.Text
+  category       String
+  deliveryType   String
+  priceMinor     Int?
+  currency       String   @default("EGP")
+  isPublished    Boolean  @default(false)
+  requiresReview Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([isPublished, category])
+}
+
+model AuditLog {
+  id          String         @id @default(cuid())
+  actorType   AuditActorType
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  ipHash      String?
+  createdAt   DateTime       @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([createdAt])
+}
