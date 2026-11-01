@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     data: {
       ...value,
       dueAt: value.dueAt ? new Date(value.dueAt) : undefined,
-      data: value.data ? value.data : undefined,
+      data: value.data ? (value.data as Prisma.InputJsonValue) : undefined,
     },
   });
   await prisma.auditLog.create({
@@ -60,7 +61,7 @@ export async function PATCH(request: NextRequest) {
   const { id, ...value } = parsed.data;
   const record = await prisma.workspaceRecord.update({
     where: { id },
-    data: { ...value, dueAt: value.dueAt ? new Date(value.dueAt) : value.dueAt },
+    data: { ...value, data: value.data ? (value.data as Prisma.InputJsonValue) : undefined, dueAt: value.dueAt ? new Date(value.dueAt) : value.dueAt },
   }).catch(() => null);
   if (!record) return NextResponse.json({ error: "السجل غير موجود" }, { status: 404 });
   await prisma.auditLog.create({
