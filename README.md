@@ -25,10 +25,16 @@ BOLA TECH's Arabic-first corporate platform and digital-services workspace.
 - Basic service health endpoint at `GET /api/health`.
 
 ## Configuration still required
-The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migration is applied. No database credentials are committed.
+The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migrations are applied. No database credentials are committed.
+
+Admin setup after database configuration:
+1. Set a strong random `AUTH_SECRET` (at least 32 bytes) in the server environment.
+2. Set `ADMIN_NAME`, `ADMIN_EMAIL`, and a unique `ADMIN_PASSWORD` (12+ characters) locally or in the secure deployment environment.
+3. Run `npm run admin:create` once to create or rotate the owner account.
+4. Open `/admin` and sign in. Never commit real environment values.
 
 ## Not yet implemented
-Admin sign-in and authorization, private admin inquiry screens, customer accounts and order tracking, payment provider integration, subscription billing, email/WhatsApp notifications, file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
+Customer accounts and order tracking, payment provider integration, subscription billing, email/WhatsApp notifications, file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
 
 ## Checks
 ```bash
