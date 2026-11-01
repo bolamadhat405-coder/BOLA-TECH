@@ -22,7 +22,9 @@ BOLA TECH's Arabic-first corporate platform and digital-services workspace.
 - Customer inquiry form connected to `POST /api/inquiries`.
 - Server-side validation, generated inquiry reference, PostgreSQL persistence, and an initial event record.
 - Initial PostgreSQL schema and migration for inquiries, inquiry events, admin users, digital products, and audit logs.
-- Basic service health endpoint at `GET /api/health`.
+- Basic service health endpoint at `GET /api/health` that checks database connectivity.
+- Protected admin portal at `/admin` with hashed-password login, signed HTTP-only sessions, failed-login throttling, inquiry search, and audited status updates.
+- Customer tracking portal at `/track`, requiring both the inquiry reference and matching email address.
 
 ## Configuration still required
 The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migrations are applied. No database credentials are committed.
@@ -34,7 +36,7 @@ Admin setup after database configuration:
 4. Open `/admin` and sign in. Never commit real environment values.
 
 ## Not yet implemented
-Customer accounts and order tracking, payment provider integration, subscription billing, email/WhatsApp notifications, file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
+Full customer accounts, payment provider integration, subscription billing, email/WhatsApp notifications, secure digital file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
 
 ## Checks
 ```bash
