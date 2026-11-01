@@ -6,7 +6,9 @@ import { z } from "zod";
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  const admin = await getAdminSession();
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  const admin = await prisma.adminUser.findFirst({ where: { id: session.id, isActive: true }, select: { id: true, name: true, email: true, role: true } });
   if (!admin) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
   const page = Math.max(1, Number(request.nextUrl.searchParams.get("page") || 1));
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
     prisma.inquiry.count(),
   ]);
 
-  return NextResponse.json({ items, total, page, pageSize });
+  return NextResponse.json({ items, total, page, pageSize, admin });
 }
 
 const statusSchema = z.object({
