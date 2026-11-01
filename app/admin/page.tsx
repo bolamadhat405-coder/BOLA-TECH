@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Activity, CheckCircle2, CircleAlert, ClipboardList, Image as ImageIcon, LayoutDashboard, LogOut, LockKeyhole, RefreshCw, Search, ShieldCheck, Sparkles, ArrowUpRight, ExternalLink } from "lucide-react";
+import { Activity, CheckCircle2, CircleAlert, ClipboardList, Image as ImageIcon, LayoutDashboard, LogOut, LockKeyhole, RefreshCw, Search, ShieldCheck, Sparkles, ArrowUpRight, ExternalLink, BriefcaseBusiness } from "lucide-react";
 
 type Inquiry = { id:string; reference:string; customerName:string; email:string; phone:string|null; company:string|null; message:string; items:unknown; status:string; createdAt:string };
 type Admin = { name:string; email:string; role:string };
@@ -66,6 +66,7 @@ export default function AdminPage() {
   return <main className="admin-shell"><header className="admin-top"><Link href="/" className="admin-brand"><span>B</span><div><b>BOLA TECH</b><small>ORBITAL OPERATIONS CENTER</small></div></Link><div className="admin-user"><span>{admin.name} · {admin.role}</span><button onClick={logout}><LogOut size={16}/> خروج</button></div></header>
     <div className="admin-layout">
       <aside className="admin-sidebar"><div className="admin-side-label">مركز الشركة</div>
+        <Link href="/admin/workspace" className="admin-workspace-link"><BriefcaseBusiness size={17}/> مساحة تشغيل الشركة</Link>
         <button className={tab==="overview"?"active":""} onClick={()=>setTab("overview")}><LayoutDashboard size={17}/> نظرة عامة</button>
         <button className={tab==="inquiries"?"active":""} onClick={()=>setTab("inquiries")}><ClipboardList size={17}/> الطلبات والعملاء <i>{items.length}</i></button>
         <button className={tab==="media"?"active":""} onClick={()=>setTab("media")}><ImageIcon size={17}/> مكتبة الوسائط <i>{media.length}</i></button>
