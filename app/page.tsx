@@ -33,6 +33,12 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [english, setEnglish] = useState(false);
   const [notice, setNotice] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerCompany, setCustomerCompany] = useState("");
+  const [customerMessage, setCustomerMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const visible = useMemo(() => products.filter(p =>
     (category === "الكل" || p.category === category) &&
@@ -46,6 +52,27 @@ export default function Home() {
   };
   const cartProducts = products.filter(p => cart.includes(p.id));
   const isEn = english;
+
+  const submitInquiry = async () => {
+    if (submitting || cartProducts.length === 0) return;
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerName, email: customerEmail, phone: customerPhone, company: customerCompany, message: customerMessage, items: cartProducts.map(p => ({ id: p.id, name: p.name })), website: "" }),
+      });
+      const data: { ok?: boolean; reference?: string; error?: string } = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || "تعذر إرسال الطلب");
+      setNotice((isEn ? "Inquiry received: " : "تم استلام طلبك. رقم المتابعة: ") + data.reference);
+      setCart([]); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setCustomerCompany(""); setCustomerMessage(""); setCartOpen(false);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "حدث خطأ أثناء إرسال الطلب");
+    } finally {
+      setSubmitting(false);
+      window.setTimeout(() => setNotice(""), 6000);
+    }
+  };
 
   return (
     <main className={isEn ? "site en" : "site"} dir={isEn ? "ltr" : "rtl"}>
