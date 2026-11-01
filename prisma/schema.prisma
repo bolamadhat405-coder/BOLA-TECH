@@ -88,6 +88,14 @@ model DigitalProduct {
   @@index([isPublished, category])
 }
 
+model AdminLoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
 model AuditLog {
   id          String         @id @default(cuid())
   actorType   AuditActorType
