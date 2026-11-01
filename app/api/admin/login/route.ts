@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = await prisma.adminUser.findUnique({ where: { email } });
-  const valid = Boolean(admin?.isActive && await compare(parsed.data.password, admin?.passwordHash ?? "$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalid"));
+  const valid = admin?.isActive ? await compare(parsed.data.password, admin.passwordHash) : false;
   if (!valid || !admin) {
     await prisma.adminLoginAttempt.create({ data: { email } });
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
