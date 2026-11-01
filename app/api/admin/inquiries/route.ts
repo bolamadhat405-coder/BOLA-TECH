@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 
@@ -26,9 +27,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ items, total, page, pageSize });
 }
 
-const statusSchema = (await import("zod")).z.object({
-  id: (await import("zod")).z.string().min(1),
-  status: (await import("zod")).z.enum([
+const statusSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum([
     "NEW", "REVIEWING", "WAITING_FOR_CUSTOMER", "APPROVED",
     "IN_PROGRESS", "READY_FOR_DELIVERY", "COMPLETED", "CANCELLED",
   ]),
