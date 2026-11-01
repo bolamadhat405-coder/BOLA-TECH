@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowUpLeft, Bot, BriefcaseBusiness, Check, ChevronDown,
+  ArrowLeft, ArrowUpLeft, ArrowUpRight, Bot, BriefcaseBusiness, Check,
   CircleHelp, Code2, Globe2, LayoutDashboard, Menu, MessageCircle,
-  Search, ShieldCheck, ShoppingBag, Sparkles, X, Zap, ChartNoAxesCombined,
-  Users, Workflow, MonitorSmartphone, Star, ArrowUpRight, Plus, Minus,
+  Search, ShieldCheck, ShoppingBag, Sparkles, X, Zap, BarChart3,
+  Users, Workflow, MonitorSmartphone, Plus,
 } from "lucide-react";
 
 type Product = {
@@ -16,7 +16,7 @@ type Product = {
 const products: Product[] = [
   { id: "sites", name: "مواقع BOLA الاحترافية", category: "مواقع وتطوير", price: 0, icon: Code2, tag: "حسب الطلب", description: "موقع سريع ومتجاوب بهوية علامتك، مع صفحات واضحة وتجربة استخدام مدروسة.", features: ["تصميم متجاوب للموبايل والكمبيوتر", "صفحات مخصصة حسب نشاطك", "تهيئة أساسية لمحركات البحث", "تسليم بعد المراجعة والاختبار"] },
   { id: "crm", name: "BOLA CRM", category: "أنظمة الأعمال", price: 0, icon: Users, description: "نظام موحد لتنظيم العملاء والفرص ومتابعة فريق المبيعات.", features: ["ملفات العملاء وسجل التفاعلات", "مراحل متابعة قابلة للتخصيص", "مهام وتذكيرات", "تقارير أداء واضحة"] },
-  { id: "finance", name: "BOLA Finance", category: "أنظمة الأعمال", price: 0, icon: ChartNoAxesCombined, description: "لوحة مالية لمتابعة الإيرادات والمصروفات والتدفقات النقدية.", features: ["تصنيف الإيرادات والمصروفات", "ملخصات مالية دورية", "تصدير التقارير", "صلاحيات حسب دور المستخدم"] },
+  { id: "finance", name: "BOLA Finance", category: "أنظمة الأعمال", price: 0, icon: BarChart3, description: "لوحة مالية لمتابعة الإيرادات والمصروفات والتدفقات النقدية.", features: ["تصنيف الإيرادات والمصروفات", "ملخصات مالية دورية", "تصدير التقارير", "صلاحيات حسب دور المستخدم"] },
   { id: "automation", name: "BOLA Automation", category: "ذكاء اصطناعي", price: 0, icon: Workflow, tag: "قريبًا", description: "أتمتة إجراءات العمل المتكررة وربط الخدمات في مسارات واضحة.", features: ["تصميم مسارات عمل", "تشغيل حسب أحداث محددة", "سجل تنفيذ وأخطاء", "مراجعة بشرية للخطوات الحساسة"] },
   { id: "assistant", name: "BOLA AI Assistant", category: "ذكاء اصطناعي", price: 0, icon: Bot, description: "مساعد ذكي يساعد فريقك في البحث والتلخيص وتنظيم المعرفة.", features: ["واجهة محادثة سهلة", "مساعدة في تلخيص المحتوى", "إجابات مرتبطة بمصادر العمل", "تحكم في الصلاحيات والبيانات"] },
   { id: "templates", name: "قوالب وأدوات رقمية", category: "منتجات رقمية", price: 0, icon: BriefcaseBusiness, description: "قوالب عملية قابلة للتخصيص لتبدأ مشروعك بخطوات منظمة.", features: ["قوالب قابلة للتحرير", "تعليمات استخدام واضحة", "ملفات منظمة", "تحديثات عند توفرها"] },
