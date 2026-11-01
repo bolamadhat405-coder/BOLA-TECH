@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   ArrowLeft, ArrowUpLeft, ArrowUpRight, Bot, BriefcaseBusiness, Check,
   CircleHelp, Code2, Globe2, LayoutDashboard, Menu, MessageCircle,
@@ -83,7 +84,7 @@ export default function Home() {
           <a href="#services" onClick={() => setMenuOpen(false)}>{isEn ? "Solutions" : "الحلول"}</a>
           <a href="#products" onClick={() => setMenuOpen(false)}>{isEn ? "Products" : "المنتجات"}</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>{isEn ? "About" : "من نحن"}</a>
-          <a href="#contact" onClick={() => setMenuOpen(false)}>{isEn ? "Contact" : "تواصل معنا"}</a>
+          <a href="#contact" onClick={() => setMenuOpen(false)}>{isEn ? "Contact" : "تواصل معنا"}</a><Link href="/track" onClick={() => setMenuOpen(false)}>{isEn ? "Track request" : "تابع طلبك"}</Link>
         </nav>
         <div className="top-actions">
           <button className="language" onClick={() => setEnglish(v => !v)}><Globe2 size={16}/>{isEn ? "العربية" : "English"}</button>
