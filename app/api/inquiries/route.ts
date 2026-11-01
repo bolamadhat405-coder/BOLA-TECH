@@ -15,7 +15,7 @@ const inquirySchema = z.object({
     id: z.string().min(1).max(80),
     name: z.string().trim().min(1).max(160),
   })).min(1).max(30),
-  website: z.string().max(0).optional(),
+  website: z.string().max(200).optional(),
 });
 
 function makeReference() {
@@ -23,6 +23,11 @@ function makeReference() {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== request.nextUrl.origin) {
+    return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+  }
+
   let payload: unknown;
 
   try {
@@ -40,7 +45,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Honeypot: silently accept bot submissions without storing them.
-  if (parsed.data.website) {
+  if (parsed.data.website?.trim()) {
     return NextResponse.json({ ok: true, reference: "received" }, { status: 202 });
   }
 
