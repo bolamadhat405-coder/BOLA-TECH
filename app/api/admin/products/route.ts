@@ -48,8 +48,14 @@ export async function POST(request: NextRequest) {
   const parsed = productSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "راجع بيانات المنتج.", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
   try {
-    const product = await prisma.product.create({ data: parsed.data });
-    await prisma.auditLog.create({ data: { actorType: "ADMIN", actorId: admin.id, action: "PRODUCT_CREATED", entityType: "Product", entityId: product.id } });
+    const product = await prisma.$transaction(async (tx) => {
+      const created = await tx.product.create({ data: parsed.data });
+      if (created.stockQuantity > 0 && created.kind === "PHYSICAL") {
+        await tx.stockMovement.create({ data: { productId: created.id, type: "IN", quantity: created.stockQuantity, notes: "Initial stock on product creation" } });
+      }
+      await tx.auditLog.create({ data: { actorType: "ADMIN", actorId: admin.id, action: "PRODUCT_CREATED", entityType: "Product", entityId: created.id } });
+      return created;
+    });
     return NextResponse.json({ product }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "رمز SKU أو الرابط المختصر مستخدم بالفعل." }, { status: 409 });
@@ -66,8 +72,16 @@ export async function PATCH(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "راجع بيانات التعديل.", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
   const { id, ...data } = parsed.data;
   try {
-    const product = await prisma.product.update({ where: { id }, data });
-    await prisma.auditLog.create({ data: { actorType: "ADMIN", actorId: admin.id, action: "PRODUCT_UPDATED", entityType: "Product", entityId: id } });
+    const product = await prisma.$transaction(async (tx) => {
+      const before = await tx.product.findUnique({ where: { id }, select: { stockQuantity: true, kind: true } });
+      if (!before) throw new Error("NOT_FOUND");
+      const updated = await tx.product.update({ where: { id }, data });
+      if (data.stockQuantity !== undefined && data.stockQuantity !== before.stockQuantity && before.kind === "PHYSICAL") {
+        await tx.stockMovement.create({ data: { productId: id, type: "ADJUSTMENT", quantity: data.stockQuantity - before.stockQuantity, notes: "Manual inventory adjustment" } });
+      }
+      await tx.auditLog.create({ data: { actorType: "ADMIN", actorId: admin.id, action: "PRODUCT_UPDATED", entityType: "Product", entityId: id } });
+      return updated;
+    });
     return NextResponse.json({ product });
   } catch {
     return NextResponse.json({ error: "المنتج غير موجود أو توجد قيمة مكررة." }, { status: 404 });
