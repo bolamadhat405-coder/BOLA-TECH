@@ -10,7 +10,7 @@ export async function GET() {
   const admin = await prisma.adminUser.findFirst({ where: { id: session.id, isActive: true }, select: { id: true } });
   if (!admin) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   try {
-    const [orders, openOrders, customers, activeProjects, openTickets, lowStock, completedRevenue, products] = await Promise.all([
+    const [orders, openOrders, customers, activeProjects, openTickets, products, lowStockProducts, completedRevenue] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: { in: ["PENDING","CONFIRMED","PROCESSING","READY","SHIPPED"] } } }),
       prisma.customer.count({ where: { isActive: true } }),
@@ -22,7 +22,7 @@ export async function GET() {
     ]);
     return NextResponse.json({
       metrics: {
-        orders, openOrders, customers, activeProjects, openTickets, lowStock, products,
+        orders, openOrders, customers, activeProjects, openTickets, lowStock: lowStockProducts.filter((product) => product.stockQuantity <= product.lowStockAt).length, products,
         completedRevenueMinor: completedRevenue._sum.total || 0,
       },
       generatedAt: new Date().toISOString(),
