@@ -44,7 +44,9 @@ export async function PATCH(request: NextRequest) {
     const order = await prisma.$transaction(async (tx) => {
       const current = await tx.order.findUnique({ where: { id }, select: { id: true, status: true, paymentStatus: true, items: true } });
       if (!current) throw new Error("NOT_FOUND");
-      if (data.status === "CANCELLED" && current.status !== "CANCELLED" && current.status !== "COMPLETED") {
+      if (current.status === "CANCELLED" && data.status && data.status !== "CANCELLED") throw new Error("CANCELLED_ORDER_LOCKED");
+      if (["SHIPPED", "COMPLETED", "REFUNDED"].includes(current.status) && data.status === "CANCELLED") throw new Error("ORDER_ALREADY_FULFILLED");
+      if (data.status === "CANCELLED" && current.status !== "CANCELLED") {
         for (const item of current.items) {
           if (!item.productId) continue;
           const product = await tx.product.findUnique({ where: { id: item.productId }, select: { id: true, kind: true } });
@@ -63,6 +65,8 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ order });
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") return NextResponse.json({ error: "الطلب غير موجود." }, { status: 404 });
+    if (error instanceof Error && error.message === "CANCELLED_ORDER_LOCKED") return NextResponse.json({ error: "لا يمكن إعادة فتح طلب ملغي؛ أنشئ طلبًا جديدًا لتجنب تكرار حركة المخزون." }, { status: 409 });
+    if (error instanceof Error && error.message === "ORDER_ALREADY_FULFILLED") return NextResponse.json({ error: "لا يمكن إلغاء طلب تم شحنه أو إكماله أو استرداده من هذه الشاشة." }, { status: 409 });
     console.error("Order update failed", error);
     return NextResponse.json({ error: "تعذر تحديث الطلب." }, { status: 500 });
   }
