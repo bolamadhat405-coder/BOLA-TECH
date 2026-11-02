@@ -1,0 +1,4 @@
+ALTER TABLE "Order"
+  ADD COLUMN "paymentMethod" TEXT NOT NULL DEFAULT 'COD',
+  ADD COLUMN "paymentStatus" TEXT NOT NULL DEFAULT 'UNPAID',
+  ADD COLUMN "shippingAddress" TEXT;
