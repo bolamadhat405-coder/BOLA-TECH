@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       const order = await tx.purchaseOrder.create({
         data: {
           number: input.number, supplierId: input.supplierId, warehouseId: input.warehouseId,
-          currency: input.currency, subtotal, notes: input.notes,
+          status: "ORDERED", orderedAt: new Date(), currency: input.currency, subtotal, notes: input.notes,
           expectedAt: input.expectedAt ? new Date(input.expectedAt) : undefined,
           items: { create: input.items.map(item => ({ productId: item.productId, quantityOrdered: item.quantity, unitCost: item.unitCost })) },
         },
