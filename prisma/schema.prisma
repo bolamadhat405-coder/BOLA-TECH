@@ -142,11 +142,46 @@ model WorkspaceRecord {
   @@index([dueAt])
 }
 
-enum OrderStatus { DRAFT PENDING CONFIRMED PROCESSING READY SHIPPED COMPLETED CANCELLED REFUNDED }
-enum ProjectStatus { PLANNED ACTIVE ON_HOLD COMPLETED CANCELLED }
-enum TicketStatus { OPEN IN_PROGRESS WAITING RESOLVED CLOSED }
-enum InvoiceStatus { DRAFT ISSUED PARTIALLY_PAID PAID OVERDUE VOID }
-enum StockMovementType { IN PURCHASE SALE RETURN ADJUSTMENT }
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  PROCESSING
+  READY
+  SHIPPED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+enum ProjectStatus {
+  PLANNED
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  VOID
+}
+enum StockMovementType {
+  IN
+  PURCHASE
+  SALE
+  RETURN
+  ADJUSTMENT
+}
 
 model Customer {
   id          String   @id @default(cuid())
