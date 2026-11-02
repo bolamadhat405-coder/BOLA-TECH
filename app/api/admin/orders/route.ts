@@ -29,7 +29,10 @@ const updateSchema = z.object({
   id: z.string().min(1),
   status: z.enum(["PENDING","CONFIRMED","PROCESSING","READY","SHIPPED","COMPLETED","CANCELLED","REFUNDED"]).optional(),
   paymentStatus: z.enum(["UNPAID","PENDING_REVIEW","PAID","FAILED","REFUNDED"]).optional(),
-}).refine((value) => value.status !== undefined || value.paymentStatus !== undefined);
+  shippingCarrier: z.string().trim().max(120).optional(),
+  trackingNumber: z.string().trim().max(120).optional(),
+  trackingUrl: z.string().url().max(1000).optional().or(z.literal("")),
+}).refine((value) => value.status !== undefined || value.paymentStatus !== undefined || value.shippingCarrier !== undefined || value.trackingNumber !== undefined || value.trackingUrl !== undefined);
 
 export async function PATCH(request: NextRequest) {
   if (request.headers.get("origin") && request.headers.get("origin") !== request.nextUrl.origin) {
@@ -56,9 +59,15 @@ export async function PATCH(request: NextRequest) {
           }
         }
       }
-      const updated = await tx.order.update({ where: { id }, data });
+      const updateData = {
+        ...data,
+        trackingUrl: data.trackingUrl === "" ? null : data.trackingUrl,
+        ...(data.status === "SHIPPED" ? { shippedAt: new Date() } : {}),
+        ...(data.status === "COMPLETED" ? { deliveredAt: new Date() } : {}),
+      };
+      const updated = await tx.order.update({ where: { id }, data: updateData });
       await tx.auditLog.create({
-        data: { actorType: "ADMIN", actorId: admin.id, action: "ORDER_UPDATED", entityType: "Order", entityId: id, metadata: { fromStatus: current.status, toStatus: data.status, fromPayment: current.paymentStatus, toPayment: data.paymentStatus } },
+        data: { actorType: "ADMIN", actorId: admin.id, action: "ORDER_UPDATED", entityType: "Order", entityId: id, metadata: { fromStatus: current.status, toStatus: data.status, fromPayment: current.paymentStatus, toPayment: data.paymentStatus, shippingCarrier: data.shippingCarrier, trackingNumber: data.trackingNumber } },
       });
       return updated;
     });
