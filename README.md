@@ -26,7 +26,7 @@ BOLA TECH's Arabic-first corporate platform and digital-services workspace.
 - Protected admin portal at `/admin` with hashed-password login, signed HTTP-only sessions, failed-login throttling, inquiry search, and audited status updates.
 - Customer tracking portal at `/track`, requiring both the inquiry reference and matching email address.
 - Original orbital visual identity assets: a digital planet hero, connected-data orbital network, and deep-space visual, stored under `public/visuals`.
-- Admin command center at `/admin` with overview, inquiry operations, and a visual asset library for the approved BOLA TECH identity.
+- Admin command center at `/admin` with overview, inquiry operations, visual asset library, product and inventory controls, order fulfillment, and company workspace links.\n- Company workspace records for CRM, projects, finance, inventory, HR, sales, and support, with protected CRUD endpoints and audit events.\n- Relational operational schema and PostgreSQL migrations for customers, products, orders, order lines, projects, tasks, invoices, expenses, employees, support tickets, contracts, and stock movements.\n- Public database-backed catalog at `/api/catalog` and customer marketplace at `/shop`.\n- Customer checkout at `POST /api/orders` with validated customer details, cash-on-delivery or manual wallet-transfer request, transactional stock reservation, and inventory movement records.\n- Protected product management at `/admin/products` and `/api/admin/products`, including publishing and stock adjustments.\n- Protected order fulfillment at `/admin/orders` and `/api/admin/orders`, including order and payment status updates, audit logging, and stock restoration on cancellation.
 
 ## Configuration still required
 The inquiry API returns HTTP 503 until a PostgreSQL `DATABASE_URL` is configured and the migrations are applied. No database credentials are committed.
@@ -38,7 +38,7 @@ Admin setup after database configuration:
 4. Open `/admin` and sign in. Never commit real environment values.
 
 ## Not yet implemented
-Full customer accounts, payment provider integration, subscription billing, email/WhatsApp notifications, secure digital file delivery, and automated customer-site provisioning. These are deliberately not represented as live features until their secure backend integrations and tests exist.
+Full customer accounts and identity lifecycle, verified payment-provider integration (wallet transfers currently require manual review; no payment is processed automatically), shipping-carrier integrations and live rates, tax/legal invoicing workflows, email/WhatsApp notifications, secure digital file delivery, supplier procurement, advanced role/permission matrix, and automated customer-site provisioning. The current marketplace is an operational foundation, not a claim of global-scale production readiness. These features require provider credentials, policy decisions, security review, and end-to-end tests before launch.
 
 ## Checks
 ```bash
