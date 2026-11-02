@@ -55,6 +55,14 @@ export async function PATCH(request: NextRequest) {
           const product = await tx.product.findUnique({ where: { id: item.productId }, select: { id: true, kind: true } });
           if (product?.kind === "PHYSICAL") {
             await tx.product.update({ where: { id: product.id }, data: { stockQuantity: { increment: item.quantity } } });
+            const mainWarehouse = await tx.warehouse.findUnique({ where: { code: "MAIN" }, select: { id: true } });
+            if (mainWarehouse) {
+              await tx.warehouseStock.upsert({
+                where: { warehouseId_productId: { warehouseId: mainWarehouse.id, productId: product.id } },
+                create: { warehouseId: mainWarehouse.id, productId: product.id, quantity: item.quantity },
+                update: { quantity: { increment: item.quantity } },
+              });
+            }
             await tx.stockMovement.create({ data: { productId: product.id, type: "RETURN", quantity: item.quantity, reference: id, notes: "Cancelled order stock restoration" } });
           }
         }
