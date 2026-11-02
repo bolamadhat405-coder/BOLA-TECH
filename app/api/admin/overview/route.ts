@@ -10,13 +10,13 @@ export async function GET() {
   const admin = await prisma.adminUser.findFirst({ where: { id: session.id, isActive: true }, select: { id: true } });
   if (!admin) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   try {
-    const [orders, openOrders, customers, activeProjects, openTickets, products, lowStockProducts, completedRevenue] = await Promise.all([
+    const [orders, openOrders, customers, activeProjects, openTickets, lowStockProducts, completedRevenue, products] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: { in: ["PENDING","CONFIRMED","PROCESSING","READY","SHIPPED"] } } }),
       prisma.customer.count({ where: { isActive: true } }),
       prisma.project.count({ where: { status: "ACTIVE" } }),
       prisma.supportTicket.count({ where: { status: { in: ["OPEN","IN_PROGRESS","WAITING"] } } }),
-      prisma.product.count({ where: { isPublished: true, kind: "PHYSICAL", stockQuantity: { lte: 3 } } }),
+      prisma.product.findMany({ where: { isPublished: true, kind: "PHYSICAL" }, select: { stockQuantity: true, lowStockAt: true } }),
       prisma.order.aggregate({ where: { status: "COMPLETED" }, _sum: { total: true } }),
       prisma.product.count(),
     ]);
