@@ -242,6 +242,11 @@ model Order {
   paymentMethod String     @default("COD")
   paymentStatus String     @default("UNPAID")
   shippingAddress String? @db.Text
+  shippingCarrier String?
+  trackingNumber String?
+  trackingUrl String?
+  shippedAt DateTime?
+  deliveredAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   customer    Customer     @relation(fields: [customerId], references: [id])
