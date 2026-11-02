@@ -110,14 +110,23 @@ export async function POST(request: NextRequest) {
             data: { stockQuantity: { decrement: item.quantity } },
           });
           if (changed.count !== 1) throw new Error("OUT_OF_STOCK");
-          const mainWarehouse = await tx.warehouse.findUnique({ where: { code: "MAIN" }, select: { id: true } });
-          if (mainWarehouse) {
+          let remaining = item.quantity;
+          const warehouseBalances = await tx.warehouseStock.findMany({
+            where: { productId: product.id, quantity: { gt: 0 }, warehouse: { isActive: true } },
+            orderBy: { warehouseId: "asc" },
+            select: { warehouseId: true, quantity: true },
+          });
+          for (const balance of warehouseBalances) {
+            if (remaining <= 0) break;
+            const take = Math.min(remaining, balance.quantity);
             const warehouseChanged = await tx.warehouseStock.updateMany({
-              where: { warehouseId: mainWarehouse.id, productId: product.id, quantity: { gte: item.quantity } },
-              data: { quantity: { decrement: item.quantity } },
+              where: { warehouseId: balance.warehouseId, productId: product.id, quantity: { gte: take } },
+              data: { quantity: { decrement: take } },
             });
             if (warehouseChanged.count !== 1) throw new Error("WAREHOUSE_STOCK_OUT_OF_SYNC");
+            remaining -= take;
           }
+          if (remaining > 0) throw new Error("WAREHOUSE_STOCK_OUT_OF_SYNC");
           await tx.stockMovement.create({
             data: { productId: product.id, type: "SALE", quantity: -item.quantity, reference: created.reference, notes: "Customer order placed" },
           });
