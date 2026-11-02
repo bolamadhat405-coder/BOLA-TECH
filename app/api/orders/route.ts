@@ -110,6 +110,14 @@ export async function POST(request: NextRequest) {
             data: { stockQuantity: { decrement: item.quantity } },
           });
           if (changed.count !== 1) throw new Error("OUT_OF_STOCK");
+          const mainWarehouse = await tx.warehouse.findUnique({ where: { code: "MAIN" }, select: { id: true } });
+          if (mainWarehouse) {
+            const warehouseChanged = await tx.warehouseStock.updateMany({
+              where: { warehouseId: mainWarehouse.id, productId: product.id, quantity: { gte: item.quantity } },
+              data: { quantity: { decrement: item.quantity } },
+            });
+            if (warehouseChanged.count !== 1) throw new Error("WAREHOUSE_STOCK_OUT_OF_SYNC");
+          }
           await tx.stockMovement.create({
             data: { productId: product.id, type: "SALE", quantity: -item.quantity, reference: created.reference, notes: "Customer order placed" },
           });
@@ -125,6 +133,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof Error && error.message === "PRODUCT_UNAVAILABLE") return NextResponse.json({ error: "أحد المنتجات لم يعد متاحًا." }, { status: 409 });
     if (error instanceof Error && error.message === "OUT_OF_STOCK") return NextResponse.json({ error: "الكمية المطلوبة غير متاحة في المخزون." }, { status: 409 });
+    if (error instanceof Error && error.message === "WAREHOUSE_STOCK_OUT_OF_SYNC") return NextResponse.json({ error: "رصيد المستودع الرئيسي غير متزامن مع المخزون العام؛ راجع أرصدة المستودعات قبل البيع." }, { status: 409 });
     if (error instanceof Error && error.message === "CURRENCY_MISMATCH") return NextResponse.json({ error: "لا يمكن جمع منتجات بعملات مختلفة في طلب واحد." }, { status: 409 });
     console.error("Order placement failed", error);
     return NextResponse.json({ error: "تعذر إتمام الطلب الآن. حاول مرة أخرى." }, { status: 500 });
