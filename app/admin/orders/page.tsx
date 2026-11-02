@@ -6,7 +6,7 @@ import { ArrowRight, RefreshCw, ShoppingBag, Truck } from "lucide-react";
 
 type Order = {
   id: string; reference: string; status: string; total: number; currency: string;
-  paymentMethod: string; paymentStatus: string; shippingAddress: string | null; createdAt: string;
+  paymentMethod: string; paymentStatus: string; shippingAddress: string | null; shippingCarrier:string|null; trackingNumber:string|null; trackingUrl:string|null; createdAt: string;
   customer: { name: string; email: string | null; phone: string | null };
   items: { id: string; title: string; quantity: number; lineTotal: number }[];
 };
@@ -57,6 +57,11 @@ export default function OrdersPage() {
         <div className="workspace-order-customer"><b>{order.customer.name}</b><span>{order.customer.phone}</span>{order.customer.email&&<span>{order.customer.email}</span>}</div>
         <div className="workspace-order-items">{order.items.map(item=><span key={item.id}>{item.title} × {item.quantity}</span>)}</div>
         {order.shippingAddress&&<p className="workspace-order-address"><Truck size={15}/>{order.shippingAddress}</p>}
+        <div className="workspace-order-actions">
+          <label>شركة الشحن<input defaultValue={order.shippingCarrier||""} placeholder="اسم شركة الشحن" onBlur={e=>{if(e.target.value!== (order.shippingCarrier||""))void update(order.id,{shippingCarrier:e.target.value});}}/></label>
+          <label>رقم التتبع<input defaultValue={order.trackingNumber||""} placeholder="رقم الشحنة" onBlur={e=>{if(e.target.value!== (order.trackingNumber||""))void update(order.id,{trackingNumber:e.target.value});}}/></label>
+          <label>رابط التتبع<input type="url" defaultValue={order.trackingUrl||""} placeholder="https://..." onBlur={e=>{if(e.target.value!== (order.trackingUrl||""))void update(order.id,{trackingUrl:e.target.value});}}/></label>
+        </div>
         <div className="workspace-order-actions">
           <label>حالة الطلب<select value={order.status} onChange={e=>void update(order.id,{status:e.target.value})}>{Object.entries(statusLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
           <label>حالة الدفع<select value={order.paymentStatus} onChange={e=>void update(order.id,{paymentStatus:e.target.value})}><option value="UNPAID">غير مدفوع</option><option value="PENDING_REVIEW">بانتظار المراجعة</option><option value="PAID">مدفوع ومؤكد</option><option value="FAILED">فشل الدفع</option><option value="REFUNDED">مسترد</option></select></label>
