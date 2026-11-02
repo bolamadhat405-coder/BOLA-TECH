@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Activity, CheckCircle2, CircleAlert, ClipboardList, Image as ImageIcon, LayoutDashboard, LogOut, LockKeyhole, RefreshCw, Search, ShieldCheck, Sparkles, ArrowUpRight, ExternalLink, BriefcaseBusiness, ShoppingBag, Package, Users } from "lucide-react";
+import { Activity, CheckCircle2, CircleAlert, ClipboardList, Image as ImageIcon, LayoutDashboard, LogOut, LockKeyhole, RefreshCw, Search, ShieldCheck, Sparkles, ArrowUpRight, ExternalLink, BriefcaseBusiness, ShoppingBag, ShoppingCart, Package, Users } from "lucide-react";
 
 type Inquiry = { id:string; reference:string; customerName:string; email:string; phone:string|null; company:string|null; message:string; items:unknown; status:string; createdAt:string };
 type Admin = { name:string; email:string; role:string };
