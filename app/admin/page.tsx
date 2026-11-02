@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Activity, CheckCircle2, CircleAlert, ClipboardList, Image as ImageIcon, LayoutDashboard, LogOut, LockKeyhole, RefreshCw, Search, ShieldCheck, Sparkles, ArrowUpRight, ExternalLink, BriefcaseBusiness, ShoppingBag, Package } from "lucide-react";
 
 type Inquiry = { id:string; reference:string; customerName:string; email:string; phone:string|null; company:string|null; message:string; items:unknown; status:string; createdAt:string };
-type Admin = { name:string; email:string; role:string };\ntype Metrics = { orders:number; openOrders:number; customers:number; activeProjects:number; openTickets:number; lowStock:number; products:number; completedRevenueMinor:number };
+type Admin = { name:string; email:string; role:string };
+type Metrics = { orders:number; openOrders:number; customers:number; activeProjects:number; openTickets:number; lowStock:number; products:number; completedRevenueMinor:number };
 type Tab = "overview" | "inquiries" | "media";
 const statuses = [["NEW","جديد"],["REVIEWING","قيد المراجعة"],["WAITING_FOR_CUSTOMER","بانتظار العميل"],["APPROVED","تمت الموافقة"],["IN_PROGRESS","قيد التنفيذ"],["READY_FOR_DELIVERY","جاهز للتسليم"],["COMPLETED","مكتمل"],["CANCELLED","ملغي"]] as const;
 const media = [
@@ -23,7 +24,8 @@ export default function AdminPage() {
   const [error,setError]=useState("");
   const [busy,setBusy]=useState(false);
   const [loading,setLoading]=useState(true);
-  const [tab,setTab]=useState<Tab>("overview");\n  const [metrics,setMetrics]=useState<Metrics|null>(null);
+  const [tab,setTab]=useState<Tab>("overview");
+  const [metrics,setMetrics]=useState<Metrics|null>(null);
 
   const loadInquiries=useCallback(async()=>{
     const response=await fetch("/api/admin/inquiries",{cache:"no-store"});
@@ -36,7 +38,8 @@ export default function AdminPage() {
 
   useEffect(()=>{
     let active=true;
-    fetch("/api/admin/overview",{cache:"no-store"}).then(async response=>{if(response.ok){const data=await response.json();if(active)setMetrics(data.metrics as Metrics);}}).catch(()=>{});\n    fetch("/api/admin/inquiries",{cache:"no-store"})
+    fetch("/api/admin/overview",{cache:"no-store"}).then(async response=>{if(response.ok){const data=await response.json();if(active)setMetrics(data.metrics as Metrics);}}).catch(()=>{});
+    fetch("/api/admin/inquiries",{cache:"no-store"})
       .then(async response=>{if(response.status===401)return null;if(!response.ok)throw new Error("تعذر تحميل لوحة الإدارة");return response.json();})
       .then(data=>{if(active&&data){setItems(data.items as Inquiry[]);setAdmin(data.admin as Admin);}})
       .catch(err=>{if(active)setError(err instanceof Error?err.message:"حدث خطأ");})
