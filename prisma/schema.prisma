@@ -237,6 +237,9 @@ model Order {
   total       Int
   currency    String       @default("EGP")
   notes       String?      @db.Text
+  paymentMethod String     @default("COD")
+  paymentStatus String     @default("UNPAID")
+  shippingAddress String? @db.Text
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   customer    Customer     @relation(fields: [customerId], references: [id])
