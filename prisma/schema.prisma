@@ -584,6 +584,7 @@ model Course {
   updatedAt     DateTime @updatedAt
   lessons       CourseLesson[]
   enrollments   CourseEnrollment[]
+  quizzes       CourseQuiz[]
   @@index([isPublished, category])
 }
 
@@ -617,6 +618,7 @@ model CourseEnrollment {
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   progress    CourseLessonProgress[]
+  quizAttempts CourseQuizAttempt[]
   @@unique([courseId, customerId])
   @@index([customerId, status])
 }
@@ -629,4 +631,71 @@ model CourseLessonProgress {
   enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   lesson       CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   @@unique([enrollmentId, lessonId])
+}
+
+
+model CourseQuiz {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?  @db.Text
+  passPercent Int      @default(60)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   CourseQuizQuestion[]
+  attempts    CourseQuizAttempt[]
+  @@index([courseId, isPublished])
+}
+
+model CourseQuizQuestion {
+  id          String   @id @default(cuid())
+  quizId      String
+  prompt      String   @db.Text
+  type        String   @default("MCQ")
+  points      Int      @default(1)
+  sortOrder   Int      @default(0)
+  quiz        CourseQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options     CourseQuizOption[]
+  answers     CourseQuizAnswer[]
+  @@index([quizId, sortOrder])
+}
+
+model CourseQuizOption {
+  id          String   @id @default(cuid())
+  questionId  String
+  label       String
+  isCorrect   Boolean  @default(false)
+  question    CourseQuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@index([questionId])
+}
+
+model CourseQuizAttempt {
+  id            String   @id @default(cuid())
+  quizId        String
+  enrollmentId  String
+  score         Int      @default(0)
+  maxScore      Int      @default(0)
+  percent       Int      @default(0)
+  passed        Boolean  @default(false)
+  submittedAt   DateTime @default(now())
+  quiz          CourseQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  enrollment    CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  answers       CourseQuizAnswer[]
+  @@index([enrollmentId, submittedAt])
+  @@index([quizId, submittedAt])
+}
+
+model CourseQuizAnswer {
+  id          String   @id @default(cuid())
+  attemptId   String
+  questionId  String
+  optionId    String?
+  textAnswer  String?  @db.Text
+  isCorrect   Boolean  @default(false)
+  pointsAwarded Int    @default(0)
+  attempt     CourseQuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question    CourseQuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@unique([attemptId, questionId])
 }
