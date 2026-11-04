@@ -272,6 +272,18 @@ model OrderItem {
   product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   @@index([orderId])
   @@index([productId])
+  warehouseAllocations OrderItemWarehouseAllocation[]
+}
+
+model OrderItemWarehouseAllocation {
+  id          String @id @default(cuid())
+  orderItemId String
+  warehouseId String
+  quantity    Int
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  @@unique([orderItemId, warehouseId])
+  @@index([warehouseId])
 }
 
 model Project {
@@ -374,6 +386,7 @@ model Warehouse {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   stocks      WarehouseStock[]
+  orderItemAllocations OrderItemWarehouseAllocation[]
   purchaseOrders PurchaseOrder[]
   transfersFrom StockTransfer[] @relation("TransferFrom")
   transfersTo StockTransfer[] @relation("TransferTo")
