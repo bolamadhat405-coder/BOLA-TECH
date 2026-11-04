@@ -55,14 +55,7 @@ export async function POST(request: NextRequest) {
 
       let subtotal = 0;
       const orderLines = [];
-      if (coupon) {
-        const reserved = await tx.coupon.updateMany({
-          where: { id: coupon.id, isActive: true, ...(coupon.usageLimit !== null ? { usageCount: { lt: coupon.usageLimit } } : {}) },
-          data: { usageCount: { increment: 1 } },
-        });
-        if (reserved.count !== 1) throw new Error("COUPON_EXHAUSTED");
-        await tx.couponRedemption.create({ data: { couponId: coupon.id, orderId: created.id, customerId, discount } });
-      }
+
       for (const item of items) {
         const product = products.find((candidate) => candidate.id === item.productId);
         if (!product) throw new Error("PRODUCT_UNAVAILABLE");
@@ -127,6 +120,15 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true, reference: true, total: true, currency: true, status: true, createdAt: true },
       });
+
+      if (coupon) {
+        const reserved = await tx.coupon.updateMany({
+          where: { id: coupon.id, isActive: true, ...(coupon.usageLimit !== null ? { usageCount: { lt: coupon.usageLimit } } : {}) },
+          data: { usageCount: { increment: 1 } },
+        });
+        if (reserved.count !== 1) throw new Error("COUPON_EXHAUSTED");
+        await tx.couponRedemption.create({ data: { couponId: coupon.id, orderId: created.id, customerId, discount } });
+      }
 
       for (const item of items) {
         const product = products.find((candidate) => candidate.id === item.productId)!;
