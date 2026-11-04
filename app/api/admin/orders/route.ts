@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest) {
   const { id, ...data } = parsed.data;
   try {
     const order = await prisma.$transaction(async (tx) => {
-      const current = await tx.order.findUnique({ where: { id }, select: { id: true, status: true, paymentStatus: true, items: true } });
+      const current = await tx.order.findUnique({ where: { id }, select: { id: true, status: true, paymentStatus: true, items: { include: { warehouseAllocations: true } } } });
       if (!current) throw new Error("NOT_FOUND");
       if (current.status === "CANCELLED" && data.status && data.status !== "CANCELLED") throw new Error("CANCELLED_ORDER_LOCKED");
       if (["SHIPPED", "COMPLETED", "REFUNDED"].includes(current.status) && data.status === "CANCELLED") throw new Error("ORDER_ALREADY_FULFILLED");
@@ -55,13 +55,24 @@ export async function PATCH(request: NextRequest) {
           const product = await tx.product.findUnique({ where: { id: item.productId }, select: { id: true, kind: true } });
           if (product?.kind === "PHYSICAL") {
             await tx.product.update({ where: { id: product.id }, data: { stockQuantity: { increment: item.quantity } } });
-            const mainWarehouse = await tx.warehouse.findUnique({ where: { code: "MAIN" }, select: { id: true } });
-            if (mainWarehouse) {
-              await tx.warehouseStock.upsert({
-                where: { warehouseId_productId: { warehouseId: mainWarehouse.id, productId: product.id } },
-                create: { warehouseId: mainWarehouse.id, productId: product.id, quantity: item.quantity },
-                update: { quantity: { increment: item.quantity } },
-              });
+            if (item.warehouseAllocations.length > 0) {
+              for (const allocation of item.warehouseAllocations) {
+                await tx.warehouseStock.upsert({
+                  where: { warehouseId_productId: { warehouseId: allocation.warehouseId, productId: product.id } },
+                  create: { warehouseId: allocation.warehouseId, productId: product.id, quantity: allocation.quantity },
+                  update: { quantity: { increment: allocation.quantity } },
+                });
+              }
+            } else {
+              // Legacy orders created before per-warehouse allocation tracking.
+              const mainWarehouse = await tx.warehouse.findUnique({ where: { code: "MAIN" }, select: { id: true } });
+              if (mainWarehouse) {
+                await tx.warehouseStock.upsert({
+                  where: { warehouseId_productId: { warehouseId: mainWarehouse.id, productId: product.id } },
+                  create: { warehouseId: mainWarehouse.id, productId: product.id, quantity: item.quantity },
+                  update: { quantity: { increment: item.quantity } },
+                });
+              }
             }
             await tx.stockMovement.create({ data: { productId: product.id, type: "RETURN", quantity: item.quantity, reference: id, notes: "Cancelled order stock restoration" } });
           }
