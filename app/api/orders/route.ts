@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
           shippingAddress: parsed.data.shippingAddress,
           items: { create: orderLines },
         },
-        select: { id: true, reference: true, total: true, currency: true, status: true, createdAt: true },
+        select: { id: true, reference: true, total: true, currency: true, status: true, createdAt: true, items: { select: { id: true, productId: true, quantity: true } } },
       });
 
       if (coupon) {
@@ -153,6 +153,8 @@ export async function POST(request: NextRequest) {
             orderBy: { warehouseId: "asc" },
             select: { warehouseId: true, quantity: true },
           });
+          const orderItem = created.items.find((line) => line.productId === product.id);
+          if (!orderItem) throw new Error("ORDER_ITEM_MISSING");
           for (const balance of warehouseBalances) {
             if (remaining <= 0) break;
             const take = Math.min(remaining, balance.quantity);
@@ -161,6 +163,9 @@ export async function POST(request: NextRequest) {
               data: { quantity: { decrement: take } },
             });
             if (warehouseChanged.count !== 1) throw new Error("WAREHOUSE_STOCK_OUT_OF_SYNC");
+            await tx.orderItemWarehouseAllocation.create({
+              data: { orderItemId: orderItem.id, warehouseId: balance.warehouseId, quantity: take },
+            });
             remaining -= take;
           }
           if (remaining > 0) throw new Error("WAREHOUSE_STOCK_OUT_OF_SYNC");
