@@ -14,7 +14,7 @@ export default function ShopPage(){
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [success,setSuccess]=useState("");
-  const [name,setName]=useState("");const [phone,setPhone]=useState("");const [email,setEmail]=useState("");const [address,setAddress]=useState("");const [payment,setPayment]=useState("COD");
+  const [name,setName]=useState("");const [phone,setPhone]=useState("");const [email,setEmail]=useState("");const [address,setAddress]=useState("");const [payment,setPayment]=useState("COD");const [couponCode,setCouponCode]=useState("");
   useEffect(()=>{fetch("/api/catalog").then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"تعذر تحميل المتجر");setProducts(d.products);}).catch(e=>setError(e instanceof Error?e.message:"تعذر تحميل المنتجات")).finally(()=>setLoading(false));},[]);
   const visible=useMemo(()=>products.filter(p=>(p.nameAr+" "+p.nameEn+" "+p.category+" "+p.sku).toLowerCase().includes(query.toLowerCase())),[products,query]);
   const total=cart.reduce((sum,line)=>sum+(products.find(p=>p.id===line.productId)?.priceMinor||0)*line.quantity,0);
