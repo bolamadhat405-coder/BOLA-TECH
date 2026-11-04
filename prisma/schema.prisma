@@ -200,6 +200,7 @@ model Customer {
   tickets     SupportTicket[]
   invoices    Invoice[]
   contracts   Contract[]
+  courseEnrollments CourseEnrollment[]
   @@index([name])
   @@index([phone])
 }
@@ -565,4 +566,67 @@ model CouponRedemption {
   coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Restrict)
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   @@index([couponId, customerId])
+}
+
+
+model Course {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  description   String   @db.Text
+  category      String   @default("GENERAL")
+  level         String   @default("ALL")
+  priceMinor    Int      @default(0)
+  currency      String   @default("EGP")
+  coverUrl      String?
+  isPublished   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lessons       CourseLesson[]
+  enrollments   CourseEnrollment[]
+  @@index([isPublished, category])
+}
+
+model CourseLesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?  @db.Text
+  videoUrl    String?
+  content     String?  @db.Text
+  durationMin Int      @default(0)
+  sortOrder   Int      @default(0)
+  isPreview   Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    CourseLessonProgress[]
+  @@index([courseId, sortOrder])
+}
+
+model CourseEnrollment {
+  id          String   @id @default(cuid())
+  courseId    String
+  customerId  String
+  status      String   @default("PENDING")
+  paidMinor   Int      @default(0)
+  paymentRef  String?
+  enrolledAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  progress    CourseLessonProgress[]
+  @@unique([courseId, customerId])
+  @@index([customerId, status])
+}
+
+model CourseLessonProgress {
+  id           String   @id @default(cuid())
+  enrollmentId String
+  lessonId     String
+  completedAt  DateTime @default(now())
+  enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson       CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  @@unique([enrollmentId, lessonId])
 }
