@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       }
 
       let discount = 0;
-      let coupon: any = null;
+      let coupon: Awaited<ReturnType<typeof tx.coupon.findUnique>> = null;
       const normalizedCoupon = parsed.data.couponCode?.trim().toUpperCase();
       if (normalizedCoupon) {
         coupon = await tx.coupon.findUnique({ where: { code: normalizedCoupon } });
