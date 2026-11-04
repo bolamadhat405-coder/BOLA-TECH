@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getCustomerSession } from "@/lib/customer-auth";
 
 export const runtime = "nodejs";
 
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
   const items = [...quantities].map(([productId, quantity]) => ({ productId, quantity }));
 
   try {
+    const customerSession = await getCustomerSession();
     const order = await prisma.$transaction(async (tx) => {
       const products = await tx.product.findMany({
         where: { id: { in: items.map((item) => item.productId) }, isPublished: true },
@@ -72,7 +74,14 @@ export async function POST(request: NextRequest) {
 
       let customerId: string;
       const email = parsed.data.customer.email?.toLowerCase();
-      if (email) {
+      if (customerSession) {
+        const account = await tx.customer.findUnique({ where: { id: customerSession.id }, select: { id: true, email: true, isActive: true } });
+        if (!account || !account.isActive || (email && email !== account.email)) throw new Error("CUSTOMER_SESSION_MISMATCH");
+        customerId = account.id;
+        await tx.customer.update({ where: { id: account.id }, data: { name: parsed.data.customer.name, phone: parsed.data.customer.phone, address: parsed.data.shippingAddress } });
+      } else if (email) {
+        const existing = await tx.customer.findUnique({ where: { email }, select: { id: true, passwordHash: true } });
+        if (existing?.passwordHash) throw new Error("CUSTOMER_AUTH_REQUIRED");
         const customer = await tx.customer.upsert({
           where: { email },
           create: { name: parsed.data.customer.name, email, phone: parsed.data.customer.phone, address: parsed.data.shippingAddress },
@@ -168,6 +177,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, order }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "CUSTOMER_AUTH_REQUIRED") return NextResponse.json({ error: "هذا البريد مرتبط بحساب عميل. سجّل الدخول إلى حسابك لإتمام الطلب." }, { status: 401 });
+    if (error instanceof Error && error.message === "CUSTOMER_SESSION_MISMATCH") return NextResponse.json({ error: "بيانات العميل لا تطابق الحساب المسجل." }, { status: 401 });
     if (error instanceof Error && error.message === "COUPON_INVALID") return NextResponse.json({ error: "كود الخصم غير صالح أو غير نشط أو خارج فترة الاستخدام." }, { status: 400 });
     if (error instanceof Error && error.message === "COUPON_CONDITIONS") return NextResponse.json({ error: "الطلب لا يحقق الحد الأدنى أو عملة كوبون الخصم." }, { status: 400 });
     if (error instanceof Error && error.message === "COUPON_EXHAUSTED") return NextResponse.json({ error: "انتهى عدد مرات استخدام هذا الكوبون." }, { status: 409 });
