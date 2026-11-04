@@ -226,6 +226,7 @@ model Product {
   stockMovements StockMovement[]
   warehouseStocks WarehouseStock[]
   purchaseOrderItems PurchaseOrderItem[]
+  stockTransferItems StockTransferItem[]
   @@index([category, isPublished])
   @@index([nameAr, nameEn])
 }
