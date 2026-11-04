@@ -511,3 +511,41 @@ model Contract {
   customer    Customer @relation(fields: [customerId], references: [id])
   @@index([customerId, status])
 }
+
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+model Coupon {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  type            CouponType
+  value           Int
+  currency        String   @default("EGP")
+  minSubtotal     Int      @default(0)
+  maxDiscount     Int?
+  usageLimit      Int?
+  usageCount      Int      @default(0)
+  perCustomerLimit Int     @default(1)
+  startsAt        DateTime?
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  redemptions     CouponRedemption[]
+  @@index([isActive, startsAt, expiresAt])
+}
+
+model CouponRedemption {
+  id         String   @id @default(cuid())
+  couponId   String
+  orderId    String   @unique
+  customerId String
+  discount   Int
+  createdAt  DateTime @default(now())
+  coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([couponId, customerId])
+}
