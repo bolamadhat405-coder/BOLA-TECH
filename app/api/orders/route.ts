@@ -13,6 +13,7 @@ const schema = z.object({
   }),
   shippingAddress: z.string().trim().min(8).max(1000),
   paymentMethod: z.enum(["COD", "WALLET_TRANSFER"]).default("COD"),
+  couponCode: z.string().trim().max(40).optional().or(z.literal("")),
   notes: z.string().trim().max(1500).optional(),
   items: z.array(z.object({
     productId: z.string().min(1),
@@ -54,6 +55,14 @@ export async function POST(request: NextRequest) {
 
       let subtotal = 0;
       const orderLines = [];
+      if (coupon) {
+        const reserved = await tx.coupon.updateMany({
+          where: { id: coupon.id, isActive: true, ...(coupon.usageLimit !== null ? { usageCount: { lt: coupon.usageLimit } } : {}) },
+          data: { usageCount: { increment: 1 } },
+        });
+        if (reserved.count !== 1) throw new Error("COUPON_EXHAUSTED");
+        await tx.couponRedemption.create({ data: { couponId: coupon.id, orderId: created.id, customerId, discount } });
+      }
       for (const item of items) {
         const product = products.find((candidate) => candidate.id === item.productId);
         if (!product) throw new Error("PRODUCT_UNAVAILABLE");
@@ -86,12 +95,29 @@ export async function POST(request: NextRequest) {
         customerId = customer.id;
       }
 
+      let discount = 0;
+      let coupon: any = null;
+      const normalizedCoupon = parsed.data.couponCode?.trim().toUpperCase();
+      if (normalizedCoupon) {
+        coupon = await tx.coupon.findUnique({ where: { code: normalizedCoupon } });
+        const now = new Date();
+        if (!coupon || !coupon.isActive || (coupon.startsAt && coupon.startsAt > now) || (coupon.expiresAt && coupon.expiresAt < now)) throw new Error("COUPON_INVALID");
+        if (coupon.currency !== currency || subtotal < coupon.minSubtotal) throw new Error("COUPON_CONDITIONS");
+        if (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit) throw new Error("COUPON_EXHAUSTED");
+        const prior = await tx.couponRedemption.count({ where: { couponId: coupon.id, customerId } });
+        if (prior >= coupon.perCustomerLimit) throw new Error("COUPON_CUSTOMER_LIMIT");
+        discount = coupon.type === "PERCENT" ? Math.floor(subtotal * coupon.value / 100) : coupon.value;
+        if (coupon.maxDiscount !== null) discount = Math.min(discount, coupon.maxDiscount);
+        discount = Math.min(subtotal, Math.max(0, discount));
+      }
       const created = await tx.order.create({
         data: {
           reference: reference(),
           customerId,
           subtotal,
-          total: subtotal,
+          discount,
+          total: subtotal - discount,
+          couponCode: coupon?.code ?? null,
           currency,
           notes: parsed.data.notes || null,
           paymentMethod: parsed.data.paymentMethod,
@@ -140,6 +166,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, order }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "COUPON_INVALID") return NextResponse.json({ error: "كود الخصم غير صالح أو غير نشط أو خارج فترة الاستخدام." }, { status: 400 });
+    if (error instanceof Error && error.message === "COUPON_CONDITIONS") return NextResponse.json({ error: "الطلب لا يحقق الحد الأدنى أو عملة كوبون الخصم." }, { status: 400 });
+    if (error instanceof Error && error.message === "COUPON_EXHAUSTED") return NextResponse.json({ error: "انتهى عدد مرات استخدام هذا الكوبون." }, { status: 409 });
+    if (error instanceof Error && error.message === "COUPON_CUSTOMER_LIMIT") return NextResponse.json({ error: "وصلت إلى الحد المسموح لاستخدام هذا الكوبون." }, { status: 409 });
     if (error instanceof Error && error.message === "PRODUCT_UNAVAILABLE") return NextResponse.json({ error: "أحد المنتجات لم يعد متاحًا." }, { status: 409 });
     if (error instanceof Error && error.message === "OUT_OF_STOCK") return NextResponse.json({ error: "الكمية المطلوبة غير متاحة في المخزون." }, { status: 409 });
     if (error instanceof Error && error.message === "WAREHOUSE_STOCK_OUT_OF_SYNC") return NextResponse.json({ error: "رصيد المستودع الرئيسي غير متزامن مع المخزون العام؛ راجع أرصدة المستودعات قبل البيع." }, { status: 409 });
