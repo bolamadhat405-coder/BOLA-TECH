@@ -70,6 +70,7 @@ export default function AdminPage() {
     <div className="admin-layout">
       <aside className="admin-sidebar"><div className="admin-side-label">مركز الشركة</div>
         <Link href="/admin/workspace" className="admin-workspace-link"><BriefcaseBusiness size={17}/> مساحة تشغيل الشركة</Link>
+        <Link href="/admin/crm" className="admin-workspace-link"><Users size={17}/> BOLA CRM · إدارة العملاء والمبيعات</Link>
         <Link href="/admin/orders" className="admin-workspace-link"><ShoppingCart size={17}/> إدارة التجارة والطلبات</Link><Link href="/admin/procurement" className="admin-workspace-link"><Package size={17}/> الموردون والمشتريات والمخازن</Link><Link href="/admin/transfers" className="admin-workspace-link"><Truck size={17}/> تحويلات المخزون</Link><Link href="/admin/operations" className="admin-workspace-link"><BriefcaseBusiness size={17}/> الموظفون والمالية والدعم</Link><Link href="/admin/coupons" className="admin-workspace-link"><TicketPercent size={17}/> الكوبونات والعروض</Link><Link href="/admin/orders" className="admin-workspace-link"><ShoppingBag size={17}/> إدارة الطلبات والشحن</Link><Link href="/admin/products" className="admin-workspace-link"><Package size={17}/> المنتجات والمخزون</Link>
         <button className={tab==="overview"?"active":""} onClick={()=>setTab("overview")}><LayoutDashboard size={17}/> نظرة عامة</button>
         <button className={tab==="inquiries"?"active":""} onClick={()=>setTab("inquiries")}><ClipboardList size={17}/> الطلبات والعملاء <i>{items.length}</i></button>
