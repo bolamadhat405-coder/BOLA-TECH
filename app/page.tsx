@@ -82,7 +82,7 @@ export default function Home() {
         <nav className={menuOpen ? "nav open" : "nav"}>
           <a href="#home" onClick={() => setMenuOpen(false)}>{isEn ? "Home" : "الرئيسية"}</a>
           <a href="#services" onClick={() => setMenuOpen(false)}>{isEn ? "Solutions" : "الحلول"}</a>
-          <Link href="/digital-products" onClick={() => setMenuOpen(false)}>{isEn ? "Digital products" : "الأنظمة والتطبيقات"}</Link><Link href="/shop" onClick={() => setMenuOpen(false)}>{isEn ? "Shop" : "المتجر"}</Link>
+          <Link href="/digital-products" onClick={() => setMenuOpen(false)}>{isEn ? "Digital products" : "الأنظمة والتطبيقات"}</Link><Link href="/shop" onClick={() => setMenuOpen(false)}>{isEn ? "Shop" : "المتجر"}</Link><Link href="/academy" onClick={() => setMenuOpen(false)}>{isEn ? "Academy" : "الأكاديمية"}</Link>
           <a href="#about" onClick={() => setMenuOpen(false)}>{isEn ? "About" : "من نحن"}</a>
           <a href="#contact" onClick={() => setMenuOpen(false)}>{isEn ? "Contact" : "تواصل معنا"}</a><Link href="/track" onClick={() => setMenuOpen(false)}>{isEn ? "Track request" : "تابع طلبك"}</Link>
         </nav>
