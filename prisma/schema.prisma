@@ -253,6 +253,8 @@ model Order {
   customer    Customer     @relation(fields: [customerId], references: [id])
   items       OrderItem[]
   invoice     Invoice?
+  couponCode String?
+  couponRedemption CouponRedemption?
   @@index([customerId, createdAt])
   @@index([status, createdAt])
 }
